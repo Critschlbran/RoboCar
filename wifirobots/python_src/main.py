@@ -8,18 +8,34 @@
 @File    :hbwz_startmain.py
 @Software: PyCharm
 """
-import os
+import signal
 import time
 import threading
 import global_values
 import main_car_control as car
 from hotspot_server import Socket
-from subprocess import call
+import image_recording_client
+import drivingStatusKeeper
+from socket import SHUT_RDWR
 
-socket = Socket()
+s = Socket()
+tcp_thread = threading.Thread(target=s.RunServer, args=(), daemon=False)
+driving_status_thread = threading.Thread(target=drivingStatusKeeper.append_status, args=(), daemon=False)
+streaming_thread =  threading.Thread(target=image_recording_client.run, args=(), daemon=True)
 
+# handle the graceful shutdown of the program
+def signal_handler(sig, frame):
+    global_values.shutdown = True
+    global_values.TCP_Server.shutdown(SHUT_RDWR)
+    global_values.image_streaming_socket.shutdown(SHUT_RDWR)
+    global_values.driving_status_socket.shutdown(SHUT_RDWR)
+    tcp_thread.join()
+    streaming_thread.join()
+    driving_status_thread.join()
+    
+signal.signal(signal.SIGINT, signal_handler)
 
-# 多功能模式切换
+# driving loop
 def cruising_mod():
     time.sleep(0.05)
     if global_values.pre_cruising_flag != global_values.cruising_flag:
@@ -29,17 +45,20 @@ def cruising_mod():
     else:
         time.sleep(0.01)
     
-# 蓝牙终端设置
 print("------wifirobots start-----")
 
-t1 = threading.Thread(target=socket.RunServer, args=(), daemon=False)
-t1.start()
-print("Starting server thread..")
+print("Starting livestream...")
+streaming_thread.start()
+print("Starting app connection...")
+tcp_thread.start()
+print("Starting driving status buffer control...")
+driving_status_thread.start()
 
+# start the video streaming to the app
 # path_sh = 'sh ' + os.path.split(os.path.abspath(__file__))[0] + '/start_mjpg_streamer.sh &'
 # call("%s" % path_sh, shell=True)
 
-while True:
+while not global_values.shutdown:
     try:
         cruising_mod()
     except Exception as e:

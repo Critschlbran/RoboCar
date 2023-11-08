@@ -8,51 +8,52 @@ import time
 import pickle
 import zlib
 import global_values
+import drivingStatusKeeper
 
 def run():
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ack_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ack_socket.bind(('', 2004))
-    client_socket.connect(('192.168.1.125', 2003))
-    #print("Connected to server!")
-    connection = client_socket.makefile('wb')
-
-    ack_socket.listen(10)
-    #print("Acknowledgement socket now listening.")
-    conn, addr = ack_socket.accept()
-
+    print("Connecting to the servers...")
+    global_values.image_streaming_socket.connect(('192.168.1.125', 2003))
+    print("Established connection to the image server...")
+    global_values.driving_status_socket.connect(('192.168.1.125', 2004))
+    print("Established connection to the driving status server...")
+    
+    
+    print("Established both connections to the server!")
+    connection = global_values.image_streaming_socket.makefile('wb')
 
     cam = cv2.VideoCapture(0)
 
-    cam.set(3, 320 * 2);
-    cam.set(4, 240 * 2);
+    cam.set(3, 320) # width
+    cam.set(4, 240) # height
     
     img_counter = 0
 
     encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
-    print("Start recording")
-    while True:
-        ret, frame = cam.read()
-        result, frame = cv2.imencode('.jpg', frame, encode_param)
-    #    data = zlib.compress(pickle.dumps(frame, 0))
+    print("Starting streaming...")
+    while not global_values.shutdown:
+        _, frame = cam.read()
+        drivingStatus = drivingStatusKeeper.get_driving_status()
+        _, frame = cv2.imencode('.jpg', frame, encode_param)
         data = pickle.dumps(frame, 0)
         size = len(data)
 
+        global_values.image_streaming_socket.sendall(struct.pack(">L", size) + data)
 
-        #print("{}: {}".format(img_counter, size))
-        client_socket.sendall(struct.pack(">L", size) + data)
-
-        ack = conn.recv(1024).decode()
+        #ack = conn.recv(1024).decode()
         #print("Received ack: ", ack)
 
-        msg = global_values.driving_status.encode()
-        conn.sendall(msg)
+        msg = drivingStatus.encode()
+        global_values.driving_status_socket.sendall(msg)
+
+        #done = conn.recv(1024).decode()
+        #print("Received done signal: ", done)
 
         img_counter += 1
-        time.sleep(1/global_values.recording_framerate)
+        time.sleep(1/global_values.streaming_framerate)
     
-
+    print("Shutting recording cam and servers down...")
     cam.release()
-    ack_socket.close()
-    client_socket.close()
+    global_values.driving_status_socket.close()
+    global_values.image_streaming_socket.close()
+    print("Successfully shut down camera and servers...")

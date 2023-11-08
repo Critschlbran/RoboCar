@@ -15,18 +15,17 @@ import binascii
 import main_car_control as car
 import global_values
 import i2c
-import image_recording_client
-import threading
+import drivingStatusKeeper
 
 
 class Socket:
     def __init__(self):
-        self.rec_flag = 0  # 0xff字节接收标志
-        self.count = 0  # 数据接收计数器标志
+        self.rec_flag = 0  # 0xff byte reception flag
+        self.count = 0  # Data receive counter flag
         self.buffer = []
 
     def RunServer(self):
-        while True:
+        while not global_values.shutdown:
             print(print('waitting for %s connection...' % "TCP", "\r"))
 
             global_values.TCP_Client = False
@@ -34,11 +33,9 @@ class Socket:
             client = global_values.TCP_Client
             print((str(socket_addr[0]) + ' %s Connected!'), "\r")
 
-            recording_thread = threading.Thread(target=image_recording_client.run, args=(), daemon=True)
-            recording_thread.start()
             print("Started recording images.")
-
-            while True:
+            
+            while not global_values.shutdown:
                 try:
                     data = global_values.TCP_Client.recv(global_values.recv_len)
                     if len(data) < global_values.recv_len:
@@ -49,13 +46,14 @@ class Socket:
                             buffer.append(data[i])
                         self.command_analysis(buffer)
 
-                except Exception as e:  # 接收出错
-                    print('socket received error:', e)  # 打印出错信息
+                except Exception as e:
+                    print('socket received error:', e) 
                     break
 
             client.close()
             car.MotorControl.Stop()
-        print("closing server")
+        print("Closing control server...")
+        print("Recording finished...")
         global_values.TCP_Server.close()
 
     # Analyze the incoming data and perform the requested action
@@ -64,33 +62,33 @@ class Socket:
         # 判断小车方向电机指令      FF  XX   XX   XX   FF
         if lists[0] == 0x00:  # 包头 功能  状态  数据 包尾
             if lists[1] == 0x00:
-                global_values.driving_status = 'stop'
                 print('Stop,command send...')
                 car.MotorControl.Stop()
+                drivingStatusKeeper.driving_status = 'stop'
             elif lists[1] == 0x01:
                 #global_values.back_flag = 1
                 if global_values.dis_flag == 1:
                     print('DriveForward,command send...')
-                    global_values.driving_status = 'forward'
                     car.MotorControl.DriveForward()
+                    drivingStatusKeeper.driving_status = 'forwards'
             elif lists[1] == 0x02:
                 print('DriveBackwards,command send...')
                 if global_values.cruising_flag == 3:
                     global_values.cruising_flag = 0
-                global_values.driving_status = 'backward'
                 car.MotorControl.DriveBackwards()
+                drivingStatusKeeper.driving_status = 'backwards'
             elif lists[1] == 0x03:
                 print('TurnLeft,command send...')
                 if global_values.cruising_flag == 3:
                     global_values.cruising_flag = 0
-                global_values.driving_status = 'left'
                 car.MotorControl.TurnLeft()
+                drivingStatusKeeper.driving_status = 'left'
             elif lists[1] == 0x04:
                 print('TurnRight,command send...')
                 if global_values.cruising_flag == 3:
                     global_values.cruising_flag = 0
-                global_values.driving_status = 'right'
                 car.MotorControl.TurnRight()
+                drivingStatusKeeper.driving_status = 'right'
 
         # 判断是否为调速指令
         elif lists[0] == 0x02:
