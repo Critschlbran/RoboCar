@@ -63,7 +63,8 @@ driving_status_connection, _ = driving_status_socket.accept()
 
 # config for displaying the driving status on the image
 font                   = cv2.FONT_HERSHEY_SIMPLEX
-bottomLeftCornerOfText = (10,50)
+bottomLeftCornerOfDrivingStatusLabel = (10,50)
+bottomLeftCornerOfRecordingLabel = (10,80)
 fontScale              = 1
 fontColor              = (255,255,255)
 thickness              = 1
@@ -73,6 +74,7 @@ data = b""
 payload_size = struct.calcsize(">L")
 
 while not close_connection:
+    data = b""
     
     while len(data) < payload_size:
         data += image_retrieval_connection.recv(4096)
@@ -88,18 +90,25 @@ while not close_connection:
     frame= pickle.loads(frame_data, fix_imports=True, encoding="bytes")
     frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
     
+    # show the client that we area ready for receiving the driving status
+    driving_status_connection.sendall("ack".encode())
+    
     # get the driving status
     drivingStatus = driving_status_connection.recv(1024).decode()
-    print("Received following driving status: ", drivingStatus)
+    print("Current driving status: ", drivingStatus)
     
-    if record == True:
+    # send acknowledgement that we received the driving status
+    driving_status_connection.sendall("ack".encode())
+    
+    if record:
         image_name = IMAGE_PATH + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + str(image_id) + "_" + drivingStatus + ".jpg"
         cv2.imwrite(image_name, frame)
-        image_id = image_id + 1
+        cv2.putText(frame, "recording", bottomLeftCornerOfRecordingLabel, font, fontScale, fontColor, thickness, lineType)
+        image_id += image_id + 1
         image_id = image_id % 1000  # don't let it get too high
     
-    cv2.putText(frame,drivingStatus, bottomLeftCornerOfText, font, fontScale, fontColor, thickness, lineType)
-    
+    cv2.putText(frame, drivingStatus, bottomLeftCornerOfDrivingStatusLabel, font, fontScale, fontColor, thickness, lineType)
+
     cv2.imshow('ImageWindow',frame)
     cv2.waitKey(1)
 
