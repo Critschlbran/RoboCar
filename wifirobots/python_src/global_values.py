@@ -21,7 +21,7 @@ min_distence = 15
 shutdown = False
 
 # streaming
-streaming_framerate = 20
+streaming_framerate = 60
 image_streaming_socket = socket(AF_INET, SOCK_STREAM)
 driving_status_socket = socket(AF_INET, SOCK_STREAM)
 

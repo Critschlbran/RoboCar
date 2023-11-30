@@ -33,7 +33,7 @@ def run():
     print("Starting streaming...")
     while not global_values.shutdown:
         _, frame = cam.read()
-        drivingStatus = drivingStatusKeeper.get_driving_status()
+        
         _, frame = cv2.imencode('.jpg', frame, encode_param)
         data = pickle.dumps(frame, 0)
         size = len(data)
@@ -43,8 +43,17 @@ def run():
         #ack = conn.recv(1024).decode()
         #print("Received ack: ", ack)
 
-        msg = drivingStatus.encode()
+        # wait for acknowledgement of the server that he is ready to receive the driving status
+        global_values.driving_status_socket.recv(1024)
+
+
+        msg = drivingStatusKeeper.get_driving_status().encode()
         global_values.driving_status_socket.sendall(msg)
+        
+        # wait for the server to acknowledge that he received the driving status
+        global_values.driving_status_socket.recv(1024)
+        
+        
 
         #done = conn.recv(1024).decode()
         #print("Received done signal: ", done)
