@@ -1,0 +1,31 @@
+import i2c
+from time import sleep
+
+def GetAngle(anglenum_from_buffer):
+    angle = hex(eval('0x' + anglenum_from_buffer))
+    angle = int(angle, 16)  # convert value from hex to int?
+    
+    # Adjust angle protection
+    if angle > 160:
+        angle = 160
+    elif angle < 15:
+        angle = 15
+    return angle
+
+def SetServoAngle(servonum, angle):
+    # Call I2C to send the servo number and angle to the microcontroller
+    # 0xFF 0x744 0x0160
+    data = (servonum << 8) + angle
+    i2c.writeinstruction(data)
+
+def StoreServoAngle():
+    print('Storing Servo angle...')
+    data = 0x1101
+    i2c.writeinstruction(data)
+    sleep(0.1) 
+
+def InitializeServo():
+    print('Initializing Servo..')
+    data = 0x1100
+    i2c.writeinstruction(data)
+    sleep(0.1)
