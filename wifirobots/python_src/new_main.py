@@ -12,7 +12,7 @@ image_streaming_thread = Thread(target=ImageStreamer.intialize_and_start_streami
 
 def signal_handler(sig, frame):
     global shutdown
-    ImageStreamer.shutdown = True
+    ImageStreamer.force_shutdown()
     ControlConnection.force_shutdown()
     control_thread.join()
     driving_status_buffer_thread.join()
@@ -21,9 +21,10 @@ def signal_handler(sig, frame):
     
 signal(SIGINT, signal_handler)
 
+control_thread.start()
 driving_status_buffer_thread.start()
 image_streaming_thread.start()
-control_thread.start()
+
 
 while not shutdown:
     sleep(0.1)

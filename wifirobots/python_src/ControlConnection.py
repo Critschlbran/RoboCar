@@ -8,6 +8,8 @@ from socket import socket, AF_INET, SOCK_STREAM, SHUT_RDWR
 
 shutdown = False
 server = socket(AF_INET, SOCK_STREAM)
+server.bind(('', 2010))
+server.listen()
 
 class MessageCategories(Enum):
     LIGHT = 0x05

@@ -49,7 +49,7 @@ def start_streaming():
         driving_status_socket.recv(1024)
         
         message = status_list[0]
-        driving_status_socket.sendall(message)
+        driving_status_socket.sendall(message.encode())
         
         # wait for the server to acknowledge the receival of the driving status
         driving_status_socket.recv(1024)
@@ -74,6 +74,6 @@ def run_status_buffering():
             del status_list[0]
         status_list.append(current_driving_status)
         sleep(0.055)
-    print("stopping driving status buffering.")
+    print("Stopping driving status buffering.")
         
      
