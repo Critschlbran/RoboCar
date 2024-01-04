@@ -1,30 +1,38 @@
 # Code from https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
 # slightly edited by myself to save images
 import socket
-import sys
 import cv2
 import pickle
 import numpy as np
-import struct ## new
-import zlib
+import struct
 from datetime import datetime
 import signal
 from pynput import keyboard
+import os
 
-IMAGE_PATH="D:\\Dev\\DHBW\\DHBW_Studienarbeit\\raw-images\\"
-image_id = 0
-
-print("Creating image socket...")
-image_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-image_socket.bind(('',2003))
-image_socket.listen()
-
-print("Creating driving status socket...")
+IMAGE_BASE_PATH=os.getcwd()+ "\\images\\"
+IMAGE_PATH = IMAGE_BASE_PATH + datetime.now().strftime('%Y%m%d_%H%M%S')
 driving_status_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-driving_status_socket.bind(('', 2004))
-driving_status_socket.listen()
-
+image_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+image_id = 0
 close_connection = False
+record = False
+dataset_dir_created = False
+
+def create_dataset_directory():
+    if not dataset_dir_created:
+        os.mkdir(IMAGE_PATH)
+        dataset_dir_created = True
+
+def setup_sockets():
+    print("Setting image socket up...")
+    image_socket.bind(('',2003))
+    image_socket.listen()
+
+    print("Setting driving status socket up...")
+    driving_status_socket.bind(('', 2004))
+    driving_status_socket.listen()
+
 def signal_handler(sig, frame):
     global close_connection
     close_connection = True
@@ -32,9 +40,7 @@ def signal_handler(sig, frame):
     image_socket.close()
     driving_status_socket.shutdown(socket.SHUT_RDWR)
     driving_status_socket.close()
-signal.signal(signal.SIGINT, signal_handler)
 
-record = False
 def on_press(key):
     global record
     global close_connection
@@ -47,19 +53,23 @@ def on_press(key):
         driving_status_socket.shutdown(socket.SHUT_RDWR)
         driving_status_socket.close()
         return False    # stop the key listener
+
+def connect_sockets():
+    global image_retrieval_connection
+    global addr
+    global driving_status_connection
     
+    print('Image socket now accepting...')
+    image_retrieval_connection, addr = image_socket.accept()
+
+    print("Driving status socket now accepting...")
+    driving_status_connection, _ = driving_status_socket.accept()
+
+signal.signal(signal.SIGINT, signal_handler)    
 listener = keyboard.Listener(on_press=on_press)
 listener.start()
-
-
-print('Image socket now accepting...')
-image_retrieval_connection, addr = image_socket.accept()
-
-
-print("Driving status socket now accepting...")
-driving_status_connection, _ = driving_status_socket.accept()
-
-
+setup_sockets()
+connect_sockets
 
 # config for displaying the driving status on the image
 font                   = cv2.FONT_HERSHEY_SIMPLEX
@@ -101,7 +111,8 @@ while not close_connection:
     driving_status_connection.sendall("ack".encode())
     
     if record:
-        image_name = IMAGE_PATH + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + str(image_id) + "_" + drivingStatus + ".jpg"
+        create_dataset_directory()
+        image_name = IMAGE_PATH + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + "{:04d}".format(image_id) + "_" + drivingStatus + ".jpg"
         cv2.imwrite(image_name, frame)
         cv2.putText(frame, "recording", bottomLeftCornerOfRecordingLabel, font, fontScale, fontColor, thickness, lineType)
         image_id += image_id + 1
