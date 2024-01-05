@@ -20,6 +20,7 @@ record = False
 dataset_dir_created = False
 
 def create_dataset_directory():
+    global dataset_dir_created
     if not dataset_dir_created:
         os.mkdir(IMAGE_PATH)
         dataset_dir_created = True
@@ -54,22 +55,16 @@ def on_press(key):
         driving_status_socket.close()
         return False    # stop the key listener
 
-def connect_sockets():
-    global image_retrieval_connection
-    global addr
-    global driving_status_connection
-    
-    print('Image socket now accepting...')
-    image_retrieval_connection, addr = image_socket.accept()
-
-    print("Driving status socket now accepting...")
-    driving_status_connection, _ = driving_status_socket.accept()
-
 signal.signal(signal.SIGINT, signal_handler)    
 listener = keyboard.Listener(on_press=on_press)
 listener.start()
 setup_sockets()
-connect_sockets
+
+print('Image socket now accepting...')
+image_retrieval_connection, _ = image_socket.accept()
+
+print("Driving status socket now accepting...")
+driving_status_connection, _ = driving_status_socket.accept()
 
 # config for displaying the driving status on the image
 font                   = cv2.FONT_HERSHEY_SIMPLEX
@@ -112,10 +107,10 @@ while not close_connection:
     
     if record:
         create_dataset_directory()
-        image_name = IMAGE_PATH + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + "{:04d}".format(image_id) + "_" + drivingStatus + ".jpg"
+        image_name = IMAGE_PATH + '\\' + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + "{:04d}".format(image_id) + "_" + drivingStatus + ".jpg"
         cv2.imwrite(image_name, frame)
         cv2.putText(frame, "recording", bottomLeftCornerOfRecordingLabel, font, fontScale, fontColor, thickness, lineType)
-        image_id += image_id + 1
+        image_id += 1
         image_id = image_id % 1000  # don't let it get too high
     
     cv2.putText(frame, drivingStatus, bottomLeftCornerOfDrivingStatusLabel, font, fontScale, fontColor, thickness, lineType)
@@ -129,3 +124,4 @@ print("Closing image socket...")
 image_socket.close()
 print("Closing driving status socket...")
 driving_status_socket.close()
+
