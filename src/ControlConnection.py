@@ -78,8 +78,6 @@ def analyze_command(command):
         CameraServo.SetServoAngle(servonumber, servoangle)
     elif main_category == MessageCategories.STORE_SERVO_ANGLE.value:
         CameraServo.StoreServoAngle()
-    elif main_category == MessageCategories.INITIALIZE_SERVO.value:
-        CameraServo.InitializeServo()
     elif main_category == MessageCategories.LIGHT.value:
         light_side = command[1]
         light_on_or_off = command[2]
@@ -93,7 +91,8 @@ def connect_and_run_remote_control():
         print("Waiting for remote connection..") 
         client, address = server.accept()
         print("Connected to ", address[0])
-        
+        CameraServo.InitializeServo()
+
         while not shutdown:
             try:
                 data = client.recv(5) # receive 5 cahracters
