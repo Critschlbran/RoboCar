@@ -56,24 +56,33 @@ files = os.listdir(synced_dataset_path)
 files = cleanup_file_list(files)
 print("Done.")
 
+files_to_remove = []
+
 # fix the "stop" labels
 print("Renaming files to eliminate \'stop\' labels...")
 for fileindex in range(0, len(files)):
     if fileindex%100 == 0:
         print(f"Progress: File {fileindex}/{len(files)}")
     
+    if fileindex >= len(files):
+        print("err {} {}".format((fileindex), len(files)))
+        
     filename = files[fileindex]
     if 'stop' in filename:
         new_label = find_next_valid_label(files, fileindex + 1)
         new_filename = replace_stop_label_with_new_label(filename, new_label)
         files[fileindex] = new_filename
         if 'delete' in new_filename:
-            os.remove(synced_dataset_path + "\\" + filename)
-            files.remove(new_filename)
-        else:
-            os.rename(synced_dataset_path + "\\" + filename, synced_dataset_path + "\\" + new_filename)
+            files_to_remove.append(new_filename)
+        os.rename(synced_dataset_path + "\\" + filename, synced_dataset_path + "\\" + new_filename)
        
-
+print('Deleting files which have the label \'deleted\'')
+for file_to_remove in files_to_remove:
+    files.remove(file_to_remove)
+    os.remove(synced_dataset_path + "\\" + file_to_remove)
+print('Done.')
+        
+files_to_remove.clear()
         
 # shift the labels
 print("Shifting labels...")
@@ -96,9 +105,14 @@ for fileindex in fileindex_range:
     new_filename = filename.replace(current_label, new_label)
     
     if 'delete' in new_filename:
-        #os.remove(synced_dataset_path + "\\" + filename)
-        print("delete in new filename")
-        os.rename(synced_dataset_path + "\\" + filename, synced_dataset_path + "\\" + new_filename)
-    else:
-        os.rename(synced_dataset_path + "\\" + filename, synced_dataset_path + "\\" + new_filename)
+        files_to_remove.append(new_filename)
+    
+    os.rename(synced_dataset_path + "\\" + filename, synced_dataset_path + "\\" + new_filename)
+    
+print('Deleting files which have the label \'deleted\'')
+for file_to_remove in files_to_remove:
+    files.remove(file_to_remove)
+    os.remove(synced_dataset_path + "\\" + file_to_remove)
+print('Done.')
+        
     
