@@ -1,6 +1,12 @@
 import os
 import shutil
 import sys
+import argparse
+
+parser = argparse.ArgumentParser(description='This script automatically sorts all the _synced datasets in the "images" folder regarding to their '+
+                                 'labels. It automatically creates a new folder "per_label" in the "images" folder and sorts the images into subfolders'+
+                                 ' called "forwards", "right" and "left".')
+parser.parse_args()
 
 def extract_label_from_imagename(filename):
     if filename == 'invalid':
