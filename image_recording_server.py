@@ -10,7 +10,7 @@ import signal
 from pynput import keyboard
 import os
 
-IMAGE_BASE_PATH=os.getcwd()+ "\\images\\"
+IMAGE_BASE_PATH = os.getcwd()+ "\\recorded_images\\"
 IMAGE_PATH = IMAGE_BASE_PATH + datetime.now().strftime('%Y%m%d_%H%M%S')
 driving_status_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 image_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
