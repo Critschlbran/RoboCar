@@ -1,1 +1,7 @@
 images/
+.vscode/
+models/
+__pycache__/
+performance_analysis/
+recorded_images/
+training_images/
