@@ -17,7 +17,7 @@ def convert_label_to_numeric_array(label):
     elif label == "left":
         return [0, 0, 1]
 
-def load_dataset(path_to_dataset, image_size = (320, 240)):
+def load_dataset(path_to_dataset :str, change_contrast : bool, image_size = (320, 240)):
     images = os.listdir(path_to_dataset)
 
     loaded_images = []
@@ -39,8 +39,12 @@ def load_dataset(path_to_dataset, image_size = (320, 240)):
         label = extract_label_from_imagename(image)
         loaded_image = cv2.imread(full_image_path)
         resized_image = cv2.resize(loaded_image, image_size)
+        if change_contrast:
+            image_with_increased_contrast = increase_contrast(resized_image)
+            loaded_images.append(image_with_increased_contrast)
+        else:
+            loaded_images.append(resized_image)
 
-        loaded_images.append(resized_image)
         loaded_labels.append(convert_label_to_numeric_array(label))
 
     images_numpy_array = numpy.array(loaded_images)
@@ -50,3 +54,7 @@ def load_dataset(path_to_dataset, image_size = (320, 240)):
     print(f'Loaded images have shape {images_numpy_array[0].shape}.')
 
     return labels_numpy_array, images_numpy_array
+
+
+def increase_contrast(image):
+    return numpy.clip(1.4 * image, 0, 255).astype(numpy.uint8)
