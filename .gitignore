@@ -1,1 +1,4 @@
 setup_hotspot.sh
+src/__pycache__/*
+src/images/*
+src/tmp_image_store/*
