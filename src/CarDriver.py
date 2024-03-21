@@ -27,6 +27,7 @@ def TurnRight():
     i2c.writeinstruction(value)
 
 def SetRightSpeed(speed):
+    print(f'Right speed: {speed}')
     right_motor = 0x27
     right_speed = speed
     a = right_motor << 8
@@ -36,6 +37,7 @@ def SetRightSpeed(speed):
     sleep(0.001)
 
 def SetLeftSpeed(speed):
+    print(f'Left speed: {speed}')
     left_motor = 0x26
     left_speed = speed
     a = left_motor << 8

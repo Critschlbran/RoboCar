@@ -4,7 +4,7 @@ import pickle
 import struct
 from time import sleep
 
-LAPTOP_IP = '192.168.1.125'
+LAPTOP_IP = '192.168.1.83'
 IMAGE_STREAMING_PORT = 2003
 DRIVING_STATUS_STREAMING_PORT = 2004
 STREAMING_IMAGE_WIDTH = 320
@@ -59,6 +59,26 @@ def start_streaming():
     camera.release()
     print("Stopping streaming.")
     
+def send_single_frame(image_frame):
+    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+
+    _, frame = cv2.imencode('.jpg', image_frame, encode_param)
+    # convert the captured image as binary
+    data = pickle.dumps(frame, 0)
+    size = len(data)
+    
+    # send the byte stream length followed by the byte stream representing the image
+    image_streaming_socket.sendall(struct.pack(">L", size) + data)
+    
+    # wait for the server to acknowledge the image receival 
+    driving_status_socket.recv(1024)
+    
+    message = status_list[0]
+    driving_status_socket.sendall(message.encode())
+    
+    # wait for the server to acknowledge the receival of the driving status
+    driving_status_socket.recv(1024)
+
 def force_shutdown():
     global shutdown
     image_streaming_socket.shutdown(SHUT_RDWR)
