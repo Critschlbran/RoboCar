@@ -3,14 +3,13 @@ import cv2
 import pickle
 import struct
 from time import sleep
+import CarDriver
 
 LAPTOP_IP = '192.168.1.83'
 IMAGE_STREAMING_PORT = 2003
 DRIVING_STATUS_STREAMING_PORT = 2004
 STREAMING_IMAGE_WIDTH = 320
 STREAMING_IMAGE_HEIGHT = 240
-
-current_driving_status = 'stop'
 
 image_streaming_socket = socket(AF_INET, SOCK_STREAM)
 driving_status_socket = socket(AF_INET, SOCK_STREAM)
@@ -92,8 +91,8 @@ def run_status_buffering():
     while not shutdown:
         if len(status_list) > 3:
             del status_list[0]
-        status_list.append(current_driving_status)
+        status_list.append(CarDriver.current_driving_status)
         sleep(0.055)
-    print("Stopping driving status buffering.")
+    print("Stopped driving status buffering.")
         
      

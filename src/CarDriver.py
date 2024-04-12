@@ -1,28 +1,50 @@
 import i2c
 from time import sleep
 
+current_driving_status = 'stop'
+
 def Stop():
     print('Car stopping...')
+    
+    global current_driving_status
+    current_driving_status = 'stop'
+    
     value = 0x210A
     i2c.writeinstruction(value)
 
 def DriveForward():
     print('Driving forwards...')
+    
+    global current_driving_status
+    current_driving_status = 'forwards'
+    
     value = 0x220A
     i2c.writeinstruction(value)
 
 def DriveBackwards():
     print('Driving backwards...')
+    
+    global current_driving_status
+    current_driving_status = 'backwards'
+    
     value = 0x230A
     i2c.writeinstruction(value)
 
 def TurnLeft():
     print('Turning left...')
+
+    global current_driving_status
+    current_driving_status = 'left'
+
     value = 0x240A
     i2c.writeinstruction(value)
 
 def TurnRight():
     print('Turning right...')
+    
+    global current_driving_status
+    current_driving_status = 'right'
+    
     value = 0x250A
     i2c.writeinstruction(value)
 

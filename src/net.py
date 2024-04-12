@@ -1,46 +1,55 @@
 import tensorflow as tf
-import keras
 import numpy as np
-from datetime import datetime
-import os
 import cv2
-from PIL import Image
 import ImageStreamer
 
-STREAMING_IMAGE_WIDTH = 320
-STREAMING_IMAGE_HEIGHT = 240
-camera = cv2.VideoCapture(0)
-camera.set(3, STREAMING_IMAGE_WIDTH)
-camera.set(4, STREAMING_IMAGE_HEIGHT)
+# camera setup
+BASE_IMG_WIDTH = 320
+BASE_IMG_HEIGHT = 240
+camera = None
 
-ImageStreamer.initialize()
+# image streaming setup
+stream_frames = False
+if stream_frames:
+    ImageStreamer.initialize()
 
+# model parameters
+model = None
+path_to_keras_model = r'/home/ubuntu/work/models/happy_house_w100_h40_no_contrast_train_98_val_96.keras'
+input_image_size = (100, 40) # (w, h)
+img_height_crop_factor = 1/2
+
+def initialize_camera():
+    global camera
+    camera = cv2.VideoCapture(0)
+    camera.set(3, BASE_IMG_WIDTH)
+    camera.set(4, BASE_IMG_HEIGHT)
+
+# load the model from the .keras file
 def load_model():
-    print('Loading model:')
-    model = tf.keras.models.load_model('/home/ubuntu/work/models/w100_h40_crop_no_contrast_97_val_99_train.keras')
-    return model
+    print(f'Loading model from: {path_to_keras_model}')
 
+    global model
+    model = tf.keras.models.load_model(path_to_keras_model)
+    
+# crop the image. This means removing the upper part of the image, width stays the same
 def crop_image(image):
-    return image[120:240, 0:320]
+    return image[(BASE_IMG_HEIGHT * img_height_crop_factor):BASE_IMG_HEIGHT, 0:BASE_IMG_WIDTH]
 
-def increase_contrast(image):
-    return np.clip(1.4 * image, 0, 255).astype(np.uint8)
-
-def predict(model):
+def predict():
     _, frame = camera.read()
     
-    #process input
+    # preprocess input
     cropped_frame = crop_image(frame)
-    print(cropped_frame.shape)
-    ImageStreamer.send_single_frame(cropped_frame)
-    image = cv2.resize(cropped_frame, (100, 40))
-    #image = increase_contrast(image)
-
+    
+    if stream_frames:
+        ImageStreamer.send_single_frame(cropped_frame)
+    
+    image = cv2.resize(cropped_frame, input_image_size)
     image = np.expand_dims(image, axis=0)
-    #frame = preprocess_input(frame)
 
     outcomes = ['forwards', 'right', 'left']
-    preds = model.predict(image)
-    pred = outcomes[np.argmax(preds)]
+    predictions = model.predict(image)
+    prediction = outcomes[np.argmax(predictions)]
 
-    return pred
+    return prediction

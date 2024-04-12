@@ -33,19 +33,14 @@ class MessageCategories(Enum):
 def execute_driving_command(command):
     if command == MessageCategories.DRIVE_COMMAND_STOP.value:
         CarDriver.Stop()
-        ImageStreamer.current_driving_status = "stop"
     elif command == MessageCategories.DRIVE_COMMAND_FORWARD.value:
         CarDriver.DriveForward()
-        ImageStreamer.current_driving_status = "forwards"
     elif command == MessageCategories.DRIVE_COMMAND_BACKWARD.value:
         CarDriver.DriveBackwards()
-        ImageStreamer.current_driving_status = "backwards"
     elif command == MessageCategories.DRIVE_COMMAND_LEFT.value:
         CarDriver.TurnLeft()
-        ImageStreamer.current_driving_status = "left"
     elif command == MessageCategories.DRIVE_COMMAND_RIGHT.value:
         CarDriver.TurnRight()
-        ImageStreamer.current_driving_status = "right"
         
 def execute_light_command(light_side, on_or_off):
     if light_side == MessageCategories.LIGHT_LEFT.value:
