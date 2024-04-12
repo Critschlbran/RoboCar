@@ -5,18 +5,17 @@ import CarDriver
 from threading import Thread
 from signal import signal, SIGINT
 from time import sleep
-import net
+import NeuralNet
 
 shutdown = False
 
-control_thread = Thread(target=ControlConnection.connect_and_run_remote_control, args=(), daemon=False)
 driving_status_buffer_thread = Thread(target=ImageStreamer.run_status_buffering, args=(), daemon=False)
 image_streaming_thread = Thread(target=ImageStreamer.intialize_and_start_streaming, args=(), daemon=False)
 
 self_driving_enabled = False
 if self_driving_enabled:
-    net.initialize_camera()
-    net.load_model()
+    NeuralNet.initialize_camera()
+    NeuralNet.load_model()
 
 def signal_handler(sig, frame):
     CarDriver.Stop()
@@ -27,7 +26,6 @@ def signal_handler(sig, frame):
     if not self_driving_enabled:
         ImageStreamer.force_shutdown()
         ControlConnection.force_shutdown()
-        #control_thread.join()
         driving_status_buffer_thread.join()
         image_streaming_thread.join()
 
@@ -41,7 +39,7 @@ if __name__ == '__main__':
     if self_driving_enabled:
         while not shutdown:
 
-            prediction = net.predict()
+            prediction = NeuralNet.predict()
                 
             print(f'Prediction is: {prediction}')
 
