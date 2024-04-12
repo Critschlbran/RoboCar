@@ -15,7 +15,7 @@ if stream_frames:
 
 # model parameters
 model = None
-path_to_keras_model = r'/home/ubuntu/work/models/happy_house_w100_h40_no_contrast_train_98_val_96.keras'
+path_to_keras_model = r'/home/ubuntu/work/models/self_constructed_w100_h40_no_contrast_train_99_val_97.keras'
 input_image_size = (100, 40) # (w, h)
 img_height_crop_factor = 1/2
 
