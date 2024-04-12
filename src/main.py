@@ -30,8 +30,6 @@ def signal_handler(sig, frame):
         #control_thread.join()
         driving_status_buffer_thread.join()
         image_streaming_thread.join()
-    
-    
 
 if __name__ == '__main__':        
     signal(SIGINT, signal_handler)
