@@ -21,10 +21,11 @@ def Initialize(stream_images : bool):
     global stream_frames
     stream_frames = stream_images
 
+    initialize_camera()
+    load_model()
+    
     if stream_images:
         ImageStreamer.Initialize()
-        initialize_camera()
-        load_model()
     
 def initialize_camera():
     global camera
