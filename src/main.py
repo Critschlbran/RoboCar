@@ -5,18 +5,27 @@ import CarDriver
 from threading import Thread
 from signal import signal, SIGINT
 from time import sleep
-import net
+import NeuralNet
+import argparse
+import sys
 
+# argument parser
+parser = argparse.ArgumentParser()
+parser.add_argument('--stream_images', type=bool, default=False, nargs='?')
+parser.add_argument('--self_driving_enabled', type=bool, default=False, nargs='?')
+
+args = parser.parse_args()
+self_driving_enabled = args.self_driving_enabled
+stream_images = args.stream_images
+
+# thread and termination setup
 shutdown = False
-
-control_thread = Thread(target=ControlConnection.connect_and_run_remote_control, args=(), daemon=False)
 driving_status_buffer_thread = Thread(target=ImageStreamer.run_status_buffering, args=(), daemon=False)
 image_streaming_thread = Thread(target=ImageStreamer.intialize_and_start_streaming, args=(), daemon=False)
 
-self_driving_enabled = False
+
 if self_driving_enabled:
-    net.initialize_camera()
-    net.load_model()
+    NeuralNet.Initialize(stream_images)
 
 def signal_handler(sig, frame):
     CarDriver.Stop()
@@ -25,11 +34,11 @@ def signal_handler(sig, frame):
     shutdown = True
 
     if not self_driving_enabled:
-        ImageStreamer.force_shutdown()
+        if stream_images:
+            ImageStreamer.force_shutdown()
+            image_streaming_thread.join()
+            driving_status_buffer_thread.join()
         ControlConnection.force_shutdown()
-        #control_thread.join()
-        driving_status_buffer_thread.join()
-        image_streaming_thread.join()
 
 if __name__ == '__main__':        
     signal(SIGINT, signal_handler)
@@ -41,7 +50,7 @@ if __name__ == '__main__':
     if self_driving_enabled:
         while not shutdown:
 
-            prediction = net.predict()
+            prediction = NeuralNet.predict()
                 
             print(f'Prediction is: {prediction}')
 
@@ -55,6 +64,9 @@ if __name__ == '__main__':
             sleep(0.075)
             CarDriver.Stop()
     else:
-        driving_status_buffer_thread.start()
-        image_streaming_thread.start()
+        
+        if stream_images:
+            driving_status_buffer_thread.start()
+            image_streaming_thread.start()
+        
         ControlConnection.connect_and_run_remote_control()

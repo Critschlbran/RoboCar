@@ -8,10 +8,8 @@ BASE_IMG_WIDTH = 320
 BASE_IMG_HEIGHT = 240
 camera = None
 
-# image streaming setup
+# image streaming parameters
 stream_frames = False
-if stream_frames:
-    ImageStreamer.initialize()
 
 # model parameters
 model = None
@@ -19,6 +17,15 @@ path_to_keras_model = r'/home/ubuntu/work/models/self_constructed_w100_h40_no_co
 input_image_size = (100, 40) # (w, h)
 img_height_crop_factor = 1/2
 
+def Initialize(stream_images : bool):
+    global stream_frames
+    stream_frames = stream_images
+
+    if stream_images:
+        ImageStreamer.Initialize()
+        initialize_camera()
+        load_model()
+    
 def initialize_camera():
     global camera
     camera = cv2.VideoCapture(0)
