@@ -11,12 +11,16 @@ import sys
 
 # argument parser
 parser = argparse.ArgumentParser()
-parser.add_argument('--stream_images', type=bool, default=False, nargs='?')
-parser.add_argument('--self_driving_enabled', type=bool, default=False, nargs='?')
+parser.add_argument('--stream_images', action=argparse.BooleanOptionalAction)
+parser.add_argument('--self_driving_enabled', action=argparse.BooleanOptionalAction)
 
 args = parser.parse_args()
 self_driving_enabled = args.self_driving_enabled
 stream_images = args.stream_images
+
+stream_images = False if stream_images is None else stream_images
+self_driving_enabled = False if self_driving_enabled is None else self_driving_enabled
+print(f'Main Method startup. Provided arguments: enable_self_driving: {self_driving_enabled}, stream_images: {stream_images}')
 
 # thread and termination setup
 shutdown = False
@@ -48,12 +52,14 @@ if __name__ == '__main__':
     CarDriver.SetRightSpeed(3)
     
     if self_driving_enabled:
-        while not shutdown:
 
+        while not shutdown:
+           
             prediction = NeuralNet.predict()
-                
+
             print(f'Prediction is: {prediction}')
 
+            CarDriver.Stop()
             if prediction == 'forwards':
                 CarDriver.DriveForward()
             elif prediction == 'right':
@@ -61,8 +67,9 @@ if __name__ == '__main__':
             else:
                 CarDriver.TurnLeft()
             
-            sleep(0.075)
+            sleep(0.05)
             CarDriver.Stop()
+        CarDriver.Stop()
     else:
         
         if stream_images:

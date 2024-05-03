@@ -13,7 +13,7 @@ stream_frames = False
 
 # model parameters
 model = None
-path_to_keras_model = r'/home/ubuntu/work/models/self_constructed_w100_h40_no_contrast_train_99_val_97.keras'
+path_to_keras_model = r'/home/raspberrypi/work/models/self_constructed_w100_h40_no_contrast_train_99_val_97.keras'
 input_image_size = (100, 40) # (w, h)
 img_height_crop_factor = 1/2
 
@@ -23,9 +23,10 @@ def Initialize(stream_images : bool):
 
     initialize_camera()
     load_model()
-    
+   
+    print('initilizing NeuralNet, stream_images: ', stream_images)
     if stream_images:
-        ImageStreamer.Initialize()
+        ImageStreamer.initialize()
     
 def initialize_camera():
     global camera
@@ -42,10 +43,10 @@ def load_model():
     
 # crop the image. This means removing the upper part of the image, width stays the same
 def crop_image(image):
-    return image[(BASE_IMG_HEIGHT * img_height_crop_factor):BASE_IMG_HEIGHT, 0:BASE_IMG_WIDTH]
+    return image[int(BASE_IMG_HEIGHT * img_height_crop_factor):BASE_IMG_HEIGHT, 0:BASE_IMG_WIDTH]
 
 def predict():
-    _, frame = camera.read()
+    _, frame = camera.read()    
     
     # preprocess input
     cropped_frame = crop_image(frame)
