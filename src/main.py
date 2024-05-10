@@ -48,18 +48,17 @@ if __name__ == '__main__':
     signal(SIGINT, signal_handler)
     
     CameraServo.InitializeServo()
-    CarDriver.SetLeftSpeed(3)
-    CarDriver.SetRightSpeed(3)
+    CarDriver.SetLeftSpeed(4)
+    CarDriver.SetRightSpeed(4)
     
     if self_driving_enabled:
 
         while not shutdown:
            
             prediction = NeuralNet.predict()
-
+           
             print(f'Prediction is: {prediction}')
 
-            CarDriver.Stop()
             if prediction == 'forwards':
                 CarDriver.DriveForward()
             elif prediction == 'right':

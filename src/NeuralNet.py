@@ -13,7 +13,7 @@ stream_frames = False
 
 # model parameters
 model = None
-path_to_keras_model = r'/home/raspberrypi/work/models/self_constructed_w100_h40_no_contrast_train_99_val_97.keras'
+path_to_keras_model = r'/home/raspberrypi/work/models/mobilenetV3small_w100_h40_crop_no_contrast_97_val_99_train.keras'
 input_image_size = (100, 40) # (w, h)
 img_height_crop_factor = 1/2
 
