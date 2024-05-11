@@ -26,16 +26,14 @@ def StoreServoAngle():
     i2c.writeinstruction(data)
     sleep(0.1) 
 
-def InitializeServo():
-    # todo init servo to face front.
-    # therefore: servonum 7, angle 95
-    # servonum 8, angle 160 and format as in the SetServoAngle method n 
+def InitializeServo(): 
     print('Initializing Servo..')
     data = 0x1100
     i2c.writeinstruction(data)
     
     sleep(0.1)
 
+    # setting servo 7 and 8 with the below specified values makes sure that the camera is facing the front of the car
     print('Setting servo angle..')
     servonum = 7
     angle = 95
