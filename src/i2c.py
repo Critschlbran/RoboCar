@@ -2,7 +2,7 @@
 """
 @version: python3.7
 @Author  : hbwz
-@Explain :I2C与单片机通信
+@Explain :I2C Communication with microcontroller
 @contact :
 @Time    :2020/05/09
 @File    :hbwz_i2c.py
@@ -13,14 +13,14 @@ import smbus
 import time, os
 import traceback
 
-# 创建smbus实例
-bus = smbus.SMBus(1)  # 0代表/dev/i2c0  1代表/dev/i2c1
-# I2C通信地址
+# create smbus instance
+bus = smbus.SMBus(1)  # 0 represents /dev/i2c0  1 represents /dev/i2c1
+# I2C communication address
 address = 0x18
 
 bus_occupied = 0
 
-# 向I2C地址写入指令
+# write command to i2c address
 def writeinstruction(values):
     # print('writeinstruction run...')
     try:
@@ -31,26 +31,26 @@ def writeinstruction(values):
         os.system('sudo i2cdetect -y 1')
 
 
-# 从I2C读取数据
+# read data from i2c address
 def readinstruction():
     s = traceback.extract_stack()
     print(s[-2][2])
-    # 红外巡线
+    # infrared patrol line
     while(bus_occupied):
         pass
     bus_occupied=1
-    if s[-2][2] == 'ir_trackline':  # 判断是谁在调用readinstruction方法
+    if s[-2][2] == 'ir_trackline':  # Determine who is calling the readinstruction method
         try:
-            # 发送红外读取指令0x32
-            value = bus.read_word_data(address, 0x32)  # 返回值：0x00 0x01  0x10 0x11 四个其中一个
+            # Send infrared reading command 0x32
+            value = bus.read_word_data(address, 0x32)  # Return value: 0x00 0x01 0x10 0x11 one of the four
             bus_occupied=0
-            # 返回红外状态指令
+            # Return to infrared status command
             return value
         except IOError:
             print('Write Error')
             os.system('sudo i2cdetect -y 1')
 
-    elif s[-2][2] == 'get_distence':  # 判断是谁在调用readinstruction方法
+    elif s[-2][2] == 'get_distence':  # Determine who is calling the readinstruction method
         try:
             value = bus.read_word_data(address, 0x31)
             bus_occupied = 0
