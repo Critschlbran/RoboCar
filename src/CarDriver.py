@@ -1,4 +1,4 @@
-import i2c
+import SMBus
 from time import sleep
 
 current_driving_status = 'stop'
@@ -10,7 +10,7 @@ def Stop():
     current_driving_status = 'stop'
     
     value = 0x210A
-    i2c.writeinstruction(value)
+    SMBus.writeinstruction(value)
 
 def DriveForward():
     print('Driving forwards...')
@@ -19,7 +19,7 @@ def DriveForward():
     current_driving_status = 'forwards'
     
     value = 0x220A
-    i2c.writeinstruction(value)
+    SMBus.writeinstruction(value)
 
 def DriveBackwards():
     print('Driving backwards...')
@@ -28,7 +28,7 @@ def DriveBackwards():
     current_driving_status = 'backwards'
     
     value = 0x230A
-    i2c.writeinstruction(value)
+    SMBus.writeinstruction(value)
 
 def TurnLeft():
     print('Turning left...')
@@ -37,7 +37,7 @@ def TurnLeft():
     current_driving_status = 'left'
 
     value = 0x240A
-    i2c.writeinstruction(value)
+    SMBus.writeinstruction(value)
 
 def TurnRight():
     print('Turning right...')
@@ -46,7 +46,7 @@ def TurnRight():
     current_driving_status = 'right'
     
     value = 0x250A
-    i2c.writeinstruction(value)
+    SMBus.writeinstruction(value)
 
 def SetRightSpeed(speed):
     print(f'Right speed: {speed}')
@@ -55,7 +55,7 @@ def SetRightSpeed(speed):
     a = right_motor << 8
     right_value = a + right_speed
     print("Setting the speed for the right side: ", hex(right_value))
-    i2c.writeinstruction(right_value)
+    SMBus.writeinstruction(right_value)
     sleep(0.001)
 
 def SetLeftSpeed(speed):
@@ -65,5 +65,5 @@ def SetLeftSpeed(speed):
     a = left_motor << 8
     left_value = a + left_speed
     print("Setting the speed for the left side: ", hex(left_value))
-    i2c.writeinstruction(left_value)
+    SMBus.writeinstruction(left_value)
     sleep(0.001)

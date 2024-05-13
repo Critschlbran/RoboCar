@@ -1,4 +1,4 @@
-import i2c
+import SMBus
 from time import sleep
 
 def GetAngle(anglenum_from_buffer):
@@ -18,12 +18,12 @@ def SetServoAngle(servonum, angle):
     # 0xFF 0x744 0x0160
     #data = (servonum << 8) + angle
     #print('Setting servo angle {}, {}'.format(servonum, angle))
-    #i2c.writeinstruction(data)
+    #SMBus.writeinstruction(data)
 
 def StoreServoAngle():
     print('Storing Servo angle...')
     data = 0x1101
-    i2c.writeinstruction(data)
+    SMBus.writeinstruction(data)
     sleep(0.1) 
 
 def InitializeServo():
@@ -32,7 +32,7 @@ def InitializeServo():
     # servonum 8, angle 160 and format as in the SetServoAngle method n 
     print('Initializing Servo..')
     data = 0x1100
-    i2c.writeinstruction(data)
+    SMBus.writeinstruction(data)
     
     sleep(0.1)
 
@@ -40,13 +40,13 @@ def InitializeServo():
     servonum = 7
     angle = 95
     data = (servonum << 8) + angle
-    i2c.writeinstruction(data)
+    SMBus.writeinstruction(data)
 
     sleep(0.1)
 
     servonum = 8
     angle = 160
     data = (servonum << 8) + angle
-    i2c.writeinstruction(data)
+    SMBus.writeinstruction(data)
 
     sleep(0.1)
