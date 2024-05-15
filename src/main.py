@@ -68,6 +68,7 @@ if __name__ == '__main__':
             
             sleep(0.05)
             CarDriver.Stop()
+            sleep(0.075)
         CarDriver.Stop()
     else:
         

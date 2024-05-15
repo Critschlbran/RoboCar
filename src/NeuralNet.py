@@ -45,11 +45,18 @@ def load_model():
 def crop_image(image):
     return image[int(BASE_IMG_HEIGHT * img_height_crop_factor):BASE_IMG_HEIGHT, 0:BASE_IMG_WIDTH]
 
+def encode_decode_image(frame):
+    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+    _, encoded_frame = cv2.imencode('.jpg', frame, encode_param)
+    processed_frame = cv2.imdecode(encoded_frame, cv2.IMREAD_COLOR)
+    return processed_frame
+
 def predict():
     _, frame = camera.read()    
-    
+
     # preprocess input
-    cropped_frame = crop_image(frame)
+    processed_frame = encode_decode_image(frame)
+    cropped_frame = crop_image(processed_frame)
     
     if stream_frames:
         ImageStreamer.send_single_frame(cropped_frame)
