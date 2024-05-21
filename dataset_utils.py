@@ -17,7 +17,10 @@ def convert_label_to_numeric_array(label):
     elif label == "left":
         return [0, 0, 1]
 
-def load_dataset(path_to_dataset :str, change_contrast : bool, image_size = (320, 240)):
+def convert_to_grayscale(image):
+    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+def load_dataset(path_to_dataset :str, change_contrast : bool, grayscale :bool, image_size = (320, 240)):
     images = os.listdir(path_to_dataset)
 
     loaded_images = []
@@ -39,11 +42,18 @@ def load_dataset(path_to_dataset :str, change_contrast : bool, image_size = (320
         label = extract_label_from_imagename(image)
         loaded_image = cv2.imread(full_image_path)
         resized_image = cv2.resize(loaded_image, image_size)
+        
+        final_edited_image = resized_image
+        
+        if grayscale:
+            final_edited_image = convert_to_grayscale(final_edited_image)
+            final_edited_image = numpy.reshape(final_edited_image, (image_size[1], image_size[0], 1))
+            final_edited_image = numpy.repeat(final_edited_image, 3, axis=2)
         if change_contrast:
-            image_with_increased_contrast = increase_contrast(resized_image)
-            loaded_images.append(image_with_increased_contrast)
-        else:
-            loaded_images.append(resized_image)
+            final_edited_image = increase_contrast(final_edited_image)
+
+        
+        loaded_images.append(final_edited_image)
 
         loaded_labels.append(convert_label_to_numeric_array(label))
 
@@ -57,4 +67,4 @@ def load_dataset(path_to_dataset :str, change_contrast : bool, image_size = (320
 
 
 def increase_contrast(image):
-    return numpy.clip(1.4 * image, 0, 255).astype(numpy.uint8)
+    return 1.4*image
