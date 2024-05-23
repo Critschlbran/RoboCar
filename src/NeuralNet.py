@@ -16,7 +16,7 @@ stream_frames = False
 model = None
 # important: adjust the image preprocessing according to the model you are using. The self constructed models need the gray scale image to have only one channel
 # whereas the mobilenet needs the images to have three channels. There are functions for both options. Make sure you use the right one.
-path_to_keras_model = r'/home/admin/work/models/mobilenetV3small_w100_h40_crop_contrast1_4_grayscale_96_val_99_train.keras'
+path_to_keras_model = r'/home/admin/work/models/model.keras'
 input_image_size = (100, 40) # (w, h)
 img_height_crop_factor = 1/2
 
@@ -78,7 +78,6 @@ def predict():
     
     image = cv2.resize(cropped_frame, input_image_size)
     image = convert_to_grayscale_three_channel(image)
-    image = increase_contrast(image)
     image = np.expand_dims(image, axis=0)
 
     outcomes = ['forwards', 'right', 'left']

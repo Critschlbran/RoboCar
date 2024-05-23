@@ -61,14 +61,15 @@ if __name__ == '__main__':
 
             if prediction == 'forwards':
                 CarDriver.DriveForward()
+                sleep(0.01)
             elif prediction == 'right':
                 CarDriver.TurnRight()
+                sleep(0.01)
             else:
                 CarDriver.TurnLeft()
+                sleep(0.01)
             
-            sleep(0.05)
             CarDriver.Stop()
-            sleep(0.075)
         CarDriver.Stop()
     else:
         
